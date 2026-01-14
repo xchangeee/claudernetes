@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+  namespace: argocd
+spec:
+  template:
+    spec:
+      containers:
+      # Main repo-server container (already exists)
+      - name: argocd-repo-server
+        volumeMounts:
+        - name: var-files
+          mountPath: /var/run/argocd
+        - name: plugins
+          mountPath: /home/argocd/cmp-server/plugins
+        - name: cmp-tmp
+          mountPath: /tmp
+
+      # Claudernetes CMP sidecar
+      - name: claudernetes
+        image: ghcr.io/xchangeee/claudernetes:latest  # Update with your registry
+        command: [/var/run/argocd/argocd-cmp-server]
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+              - ALL
+        volumeMounts:
+        - name: var-files
+          mountPath: /var/run/argocd
+        - name: plugins
+          mountPath: /home/argocd/cmp-server/plugins
+        - name: cmp-tmp
+          mountPath: /tmp
+        - name: anthropic-api-key
+          mountPath: /var/run/secrets/anthropic-api-key
+          readOnly: true
+
+      volumes:
+      - name: var-files
+        emptyDir: {}
+      - name: plugins
+        emptyDir: {}
+      - name: cmp-tmp
+        emptyDir: {}
+      - name: anthropic-api-key
+        secret:
+          secretName: anthropic-api-key
+          items:
+          - key: api-key
+            path: api-key
