@@ -88,7 +88,7 @@ git add .
 git status
 
 echo_info "Committing test application files..."
-git commit -m "Initial commit with claudernetes.yaml"
+git commit -m "Initial commit with claudernetes.md"
 
 # Push to Gitea
 echo_info "Pushing to Gitea..."
@@ -98,10 +98,10 @@ git push -u origin main --force
 # Verify the push
 echo_info "Verifying repository contents..."
 TREE_RESPONSE=$(curl -s "http://localhost:3001/api/v1/repos/test/test-app/git/trees/main" -u test:test123)
-if echo "$TREE_RESPONSE" | grep -q "claudernetes.yaml"; then
-    echo_info "✓ claudernetes.yaml found in repository!"
+if echo "$TREE_RESPONSE" | grep -q "claudernetes.md"; then
+    echo_info "✓ claudernetes.md found in repository!"
 else
-    echo_error "✗ claudernetes.yaml NOT found in repository!"
+    echo_error "✗ claudernetes.md NOT found in repository!"
     echo "$TREE_RESPONSE"
 fi
 

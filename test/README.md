@@ -87,7 +87,7 @@ You can modify the test application in two ways:
 
 1. Access Gitea at [http://localhost:3000](http://localhost:3000)
 2. Navigate to the test/test-app repository
-3. Edit `claudernetes.yaml`
+3. Edit `claudernetes.md`
 4. Commit the changes
 5. ArgoCD will automatically detect and sync
 
@@ -99,7 +99,7 @@ git clone http://localhost:3000/test/test-app.git
 cd test-app
 
 # Make changes
-vim claudernetes.yaml
+vim claudernetes.md
 
 # Commit and push
 git add .
@@ -137,7 +137,7 @@ kubectl rollout status deployment/argocd-repo-server -n argocd
 - [setup.sh](setup.sh) - Automated setup script
 - [gitea.yaml](gitea.yaml) - Gitea local git server deployment
 - [argocd-repo-server-patch.yaml](argocd-repo-server-patch.yaml) - Patch to add CMP sidecar
-- [test-app/claudernetes.yaml](test-app/claudernetes.yaml) - Example instructions for Claude
+- [test-app/claudernetes.md](test-app/claudernetes.md) - Example instructions for Claude
 - [test-app-application.yaml](test-app-application.yaml) - ArgoCD Application manifest
 - [teardown.sh](teardown.sh) - Cleanup script to delete the cluster
 
@@ -196,13 +196,12 @@ git clone http://test:test123@localhost:3000/test/test-app.git redis-test
 cd redis-test
 
 # Modify the instructions
-cat > claudernetes.yaml <<EOF
-instructions: |
-  Create a Redis deployment with:
-  - StatefulSet with 1 replica
-  - PersistentVolumeClaim for 1Gi storage
-  - Headless service
-  - ConfigMap with redis.conf
+cat > claudernetes.md <<EOF
+Create a Redis deployment with:
+- StatefulSet with 1 replica
+- PersistentVolumeClaim for 1Gi storage
+- Headless service
+- ConfigMap with redis.conf
 EOF
 
 # Push as a new repo

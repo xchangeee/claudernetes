@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Claudernetes - ArgoCD CMP for Claude-generated Kubernetes manifests
-Reads claudernetes.yaml, calls Claude API, outputs K8s YAML
+Reads claudernetes.md, calls Claude API, outputs K8s YAML
 """
 
 import os
@@ -29,11 +29,11 @@ Be concise but complete. Prioritize correctness and production-readiness."""
 
 
 def read_instructions():
-    """Read instructions from claudernetes.yaml in current directory."""
-    instruction_file = Path("claudernetes.yaml")
+    """Read instructions from claudernetes.md in current directory."""
+    instruction_file = Path("claudernetes.md")
 
     if not instruction_file.exists():
-        print(f"Error: claudernetes.yaml not found in {Path.cwd()}", file=sys.stderr)
+        print(f"Error: claudernetes.md not found in {Path.cwd()}", file=sys.stderr)
         sys.exit(1)
 
     try:
@@ -41,7 +41,7 @@ def read_instructions():
             content = f.read()
         return content
     except Exception as e:
-        print(f"Error reading claudernetes.yaml: {e}", file=sys.stderr)
+        print(f"Error reading claudernetes.md: {e}", file=sys.stderr)
         sys.exit(1)
 
 

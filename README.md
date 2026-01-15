@@ -4,7 +4,7 @@ ArgoCD Config Management Plugin (CMP) that uses Claude API to dynamically genera
 
 ## What is claudernetes?
 
-claudernetes lets you describe your Kubernetes infrastructure in plain English instead of writing YAML. Put a `claudernetes.yaml` file in your Git repo with instructions, and ArgoCD + Claude will generate production-ready manifests automatically.
+claudernetes lets you describe your Kubernetes infrastructure in plain English instead of writing YAML. Put a `claudernetes.md` file in your Git repo with instructions, and ArgoCD + Claude will generate production-ready manifests automatically.
 
 ## Features
 
@@ -59,19 +59,19 @@ kubectl logs -n argocd -l app.kubernetes.io/name=argocd-repo-server -c clauderne
 
 ## Usage
 
-### 1. Create claudernetes.yaml in Your Repo
+### 1. Create claudernetes.md in Your Repo
 
-```yaml
-# claudernetes.yaml
-instructions: |
-  Create a production deployment for my FastAPI application:
+```markdown
+# claudernetes.md
 
-  - Image: myregistry/fastapi-app:v1.0.0
-  - 3 replicas
-  - Expose on port 8000
-  - Add health checks on /health endpoint
-  - Set resource limits appropriately
-  - Include a Service and Ingress with TLS
+Create a production deployment for my FastAPI application:
+
+- Image: myregistry/fastapi-app:v1.0.0
+- 3 replicas
+- Expose on port 8000
+- Add health checks on /health endpoint
+- Set resource limits appropriately
+- Include a Service and Ingress with TLS
 ```
 
 ### 2. Create ArgoCD Application
@@ -91,7 +91,7 @@ Or via ArgoCD UI:
 
 ArgoCD will:
 
-1. Detect `claudernetes.yaml` in your repo
+1. Detect `claudernetes.md` in your repo
 2. Call claudernetes CMP sidecar
 3. Claude API generates K8s manifests
 4. ArgoCD syncs them to your cluster
@@ -102,7 +102,7 @@ ArgoCD will:
 ┌─────────────────┐
 │   Git Repo      │
 │                 │
-│ claudernetes.yaml│
+│ claudernetes.md │
 │ (instructions)  │
 └────────┬────────┘
          │
@@ -114,7 +114,7 @@ ArgoCD will:
 │  ┌──────────────────────────────┐  │
 │  │ claudernetes CMP sidecar     │  │
 │  │                              │  │
-│  │ 1. Read claudernetes.yaml    │  │
+│  │ 1. Read claudernetes.md      │  │
 │  │ 2. Read API key from secret  │  │
 │  │ 3. Call Claude API           │  │
 │  │ 4. Return K8s YAML           │  │
@@ -133,48 +133,45 @@ ArgoCD will:
 
 ### Simple Deployment
 
-```yaml
-instructions: |
-  Deploy nginx with 2 replicas and a LoadBalancer service
+```markdown
+Deploy nginx with 2 replicas and a LoadBalancer service
 ```
 
 ### Complex Multi-Resource
 
-```yaml
-instructions: |
-  Create a complete setup for Redis:
-  - StatefulSet with 3 replicas
-  - Persistent storage (1Gi per pod)
-  - ConfigMap for redis.conf
-  - Headless service for cluster
-  - Regular service for clients
-  - PodDisruptionBudget
-  - NetworkPolicy to allow only app pods
+```markdown
+Create a complete setup for Redis:
+- StatefulSet with 3 replicas
+- Persistent storage (1Gi per pod)
+- ConfigMap for redis.conf
+- Headless service for cluster
+- Regular service for clients
+- PodDisruptionBudget
+- NetworkPolicy to allow only app pods
 ```
 
 ### With Specific Requirements
 
-```yaml
-instructions: |
-  Deploy my microservice with these exact specs:
+```markdown
+Deploy my microservice with these exact specs:
 
-  Deployment:
-  - Name: user-service
-  - Image: myregistry/user-service:sha-abc123
-  - Replicas: 5
-  - Strategy: RollingUpdate (maxSurge: 1, maxUnavailable: 0)
-  - Container port: 3000
-  - Environment variables from ConfigMap "user-service-config"
-  - Secret "user-service-secrets" for DB credentials
-  - Resources: requests 100m/128Mi, limits 500m/512Mi
-  - Liveness probe: HTTP GET /health every 10s
-  - Readiness probe: HTTP GET /ready every 5s
+Deployment:
+- Name: user-service
+- Image: myregistry/user-service:sha-abc123
+- Replicas: 5
+- Strategy: RollingUpdate (maxSurge: 1, maxUnavailable: 0)
+- Container port: 3000
+- Environment variables from ConfigMap "user-service-config"
+- Secret "user-service-secrets" for DB credentials
+- Resources: requests 100m/128Mi, limits 500m/512Mi
+- Liveness probe: HTTP GET /health every 10s
+- Readiness probe: HTTP GET /ready every 5s
 
-  Service:
-  - Type: ClusterIP
-  - Port 80 -> 3000
+Service:
+- Type: ClusterIP
+- Port 80 -> 3000
 
-  Also include appropriate labels and annotations for monitoring.
+Also include appropriate labels and annotations for monitoring.
 ```
 
 ## Configuration
@@ -220,7 +217,7 @@ Check ArgoCD logs:
 kubectl logs -n argocd -l app.kubernetes.io/name=argocd-repo-server -c argocd-repo-server
 ```
 
-Ensure `claudernetes.yaml` exists in repo root.
+Ensure `claudernetes.md` exists in repo root.
 
 ### API Key Issues
 
@@ -244,7 +241,7 @@ Common issues:
 
 - Invalid API key
 - Network connectivity to api.anthropic.com
-- Malformed instructions in claudernetes.yaml
+- Malformed instructions in claudernetes.md
 
 ### Invalid YAML Output
 
@@ -270,7 +267,7 @@ If Claude generates markdown code blocks:
 
 Claude API charges per token:
 
-- Input: Instructions from claudernetes.yaml
+- Input: Instructions from claudernetes.md
 - Output: Generated manifests
 
 Tips:

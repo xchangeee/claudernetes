@@ -1,0 +1,18 @@
+Create a production-ready deployment for a web application with these requirements:
+
+Application Details:
+- Name: my-web-app
+- Namespace: production
+- Image: nginx:1.25-alpine
+- Replicas: 3
+- Port: 80
+
+Requirements:
+- Include a Deployment with rolling update strategy
+- Add a Service (ClusterIP) exposing port 80
+- Set resource limits: 256Mi memory, 200m CPU
+- Set resource requests: 128Mi memory, 100m CPU
+- Add health checks (liveness and readiness probes on /)
+- Use security context: runAsNonRoot, readOnlyRootFilesystem
+- Add labels: app=my-web-app, environment=production
+- Include a HorizontalPodAutoscaler (min 3, max 10, 70% CPU target)

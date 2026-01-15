@@ -29,16 +29,15 @@ data:
     git config user.name "Test User"
 
     # Copy test app files
-    cat > claudernetes.yaml <<EOF
-    instructions: |
-      Create a simple test deployment for nginx:
+    cat > claudernetes.md <<EOF
+    Create a simple test deployment for nginx:
 
-      - Use nginx:latest image
-      - 2 replicas
-      - Expose on port 80
-      - Include a ClusterIP Service
-      - Add appropriate labels and health checks
-      - Set reasonable resource limits
+    - Use nginx:latest image
+    - 2 replicas
+    - Expose on port 80
+    - Include a ClusterIP Service
+    - Add appropriate labels and health checks
+    - Set reasonable resource limits
     EOF
 
     git add .
