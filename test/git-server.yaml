@@ -1,0 +1,148 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: git-server
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-repos
+  namespace: git-server
+data:
+  init-repos.sh: |
+    #!/bin/sh
+    set -e
+
+    # Initialize test-app repo
+    cd /git-repos
+    mkdir -p test-app.git
+    cd test-app.git
+    git init --bare
+    git config --local http.receivepack true
+
+    # Create a working directory to add initial content
+    cd /tmp
+    mkdir test-app-work
+    cd test-app-work
+    git init
+    git config user.email "test@example.com"
+    git config user.name "Test User"
+
+    # Copy test app files
+    cat > claudernetes.yaml <<EOF
+    instructions: |
+      Create a simple test deployment for nginx:
+
+      - Use nginx:latest image
+      - 2 replicas
+      - Expose on port 80
+      - Include a ClusterIP Service
+      - Add appropriate labels and health checks
+      - Set reasonable resource limits
+    EOF
+
+    git add .
+    git commit -m "Initial commit"
+    git remote add origin /git-repos/test-app.git
+    git push origin master
+
+    echo "Repository initialized successfully!"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: git-server
+  namespace: git-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: git-server
+  template:
+    metadata:
+      labels:
+        app: git-server
+    spec:
+      initContainers:
+        - name: init-repos
+          image: alpine/git:latest
+          command: ["/bin/sh", "/scripts/init-repos.sh"]
+          volumeMounts:
+            - name: git-repos
+              mountPath: /git-repos
+            - name: scripts
+              mountPath: /scripts
+      containers:
+        - name: git-http-backend
+          image: nginx:alpine
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: git-repos
+              mountPath: /git-repos
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: git-repos
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: git-repos
+            defaultMode: 0755
+        - name: nginx-config
+          configMap:
+            name: nginx-git-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-git-config
+  namespace: git-server
+data:
+  nginx.conf: |
+    events {
+        worker_connections 1024;
+    }
+
+    http {
+        server {
+            listen 80;
+            server_name _;
+
+            location ~ ^.*\.git/objects/([0-9a-f]+/[0-9a-f]+|pack/pack-[0-9a-f]+.(pack|idx))$ {
+                root /git-repos;
+            }
+
+            location ~ ^.*\.git/(HEAD|info/refs|objects/info/.*|git-(upload|receive)-pack)$ {
+                root /git-repos;
+
+                fastcgi_pass unix:/var/run/fcgiwrap.socket;
+                fastcgi_param SCRIPT_FILENAME /usr/lib/git-core/git-http-backend;
+                fastcgi_param GIT_HTTP_EXPORT_ALL "";
+                fastcgi_param GIT_PROJECT_ROOT /git-repos;
+                fastcgi_param PATH_INFO $uri;
+                fastcgi_param REMOTE_USER $remote_user;
+                include fastcgi_params;
+            }
+
+            # Simple file serving for git repos
+            location / {
+                root /git-repos;
+                autoindex on;
+            }
+        }
+    }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: git-server
+  namespace: git-server
+spec:
+  selector:
+    app: git-server
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP

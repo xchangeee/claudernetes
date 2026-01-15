@@ -1,0 +1,27 @@
+spec:
+  template:
+    spec:
+      volumes:
+        - name: cmp-tmp
+          emptyDir: {}
+        - name: anthropic-api-key
+          secret:
+            secretName: anthropic-api-key
+      containers:
+        - name: claudernetes
+          image: claudernetes-cmp:local
+          command: [/var/run/argocd/argocd-cmp-server]
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 999
+          volumeMounts:
+            - name: var-files
+              mountPath: /var/run/argocd
+            - name: plugins
+              mountPath: /home/argocd/cmp-server/plugins
+            - name: cmp-tmp
+              mountPath: /tmp
+            - name: anthropic-api-key
+              mountPath: /var/run/secrets/anthropic-api-key
+              readOnly: true

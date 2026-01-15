@@ -1,0 +1,2 @@
+# Ignore test app git repo if created locally
+test-app/.git
